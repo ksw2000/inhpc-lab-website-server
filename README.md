@@ -15,14 +15,17 @@ sudo service httpd start   # 重啟
 
 ```json
 {
-    "domain": "algorithm.csie.ncku.edu.tw", // 配合憑證
-    "autocert": false,  // 設定 true 的話程式會自己從 Let's Encrypt 抓加密檔
-    "certification": {  // 設定憑證路徑
+    "domain": "algorithm.csie.ncku.edu.tw", 
+    "autocert": false,
+    "certification": {
         "crt": "",
         "key": ""
     }
 }
 ```
+
++ `domain` 配合憑證
++ `autocert` 設定 true 的話程式會自己從 Let's Encrypt 抓加密檔
 
 4. main.go 參數 `-p` 指定 port 預設在 `8080`，佈署時可以設定 `443` 會同時執行 http `80` 和 https `443` 並將 http `80` 重新導向 `443` https
 
@@ -39,7 +42,7 @@ Login success if the `student_id` is in the file `/login.txt`.
 **Request**
 ```json
 {
-    student_id: "P12345678"
+    "student_id": "P12345678"
 }
 ```
 
@@ -49,7 +52,7 @@ Return empty string if success
 
 ```json
 {
-    err: "Authentication Fail"
+    "err": "Authentication Fail"
 }
 ```
 
@@ -62,7 +65,7 @@ Return empty string if success
 **Response**
 ```json
 {
-    is: true
+    "is": true
 }
 ```
 
@@ -77,14 +80,14 @@ Return empty string if success
 **Response**
 ```json
 {
-    files: [
+    "files": [
         {
-            name: "f1.pdf",
-            url: "/files/[course]/f1.pdf"
+            "name": "f1.pdf",
+            "url": "/files/[course]/f1.pdf"
         },
         {
-            name: "f2.ppt",
-            url: "/files/[course]/f2.ppt"
+            "name": "f2.ppt",
+            "url": "/files/[course]/f2.ppt"
         }
     ]
 }
