@@ -24,5 +24,6 @@ _*
 angular/*
 !angular/.keep
 files/*
+!files/.keep
 config/*.json
 login.txt
