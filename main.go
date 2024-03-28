@@ -17,9 +17,8 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-var studentIDList []string
+var studentIDSet map[string]interface{}
 
-// var session
 func main() {
 	port := flag.Int("p", 8080, "Port number (default: 8080)")
 	flag.Parse()
@@ -53,11 +52,7 @@ func main() {
 			}
 
 			pass := false
-			for i := range studentIDList {
-				if receiver.StudentID == studentIDList[i] {
-					pass = true
-				}
-			}
+			_, pass = studentIDSet[receiver.StudentID]
 			if pass {
 				s.Set("isLogin", true)
 				sender.Err = ""
@@ -100,9 +95,27 @@ func main() {
 				return
 			}
 			dir := queries.Get("dir")
-			// 注意安全漏洞
+
+			allowDir := map[string]interface{}{}
+			if dirEntry, err := os.ReadDir("./files"); err != nil {
+				sender.Err = "Internal server error"
+				encoder.Encode(sender)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				for _, f := range dirEntry {
+					if f.IsDir() {
+						allowDir[f.Name()] = nil
+					}
+				}
+			}
+
 			if dirEntry, err := os.ReadDir(path.Join("./files/", dir)); err != nil {
 				sender.Err = "params error"
+				encoder.Encode(sender)
+				return
+			} else if _, in := allowDir[dir]; !in {
+				sender.Err = "access denied"
 				encoder.Encode(sender)
 				return
 			} else {
@@ -176,6 +189,7 @@ func neuter(next http.Handler, auth bool, session *sessions.Sessions) http.Handl
 			s := session.Start(w, r)
 			if pass, err := s.GetBoolean("isLogin"); err != nil || !pass {
 				fmt.Fprintf(w, "Access deny")
+				w.WriteHeader(http.StatusForbidden)
 				return
 			}
 		}
@@ -196,7 +210,7 @@ func redirect(w http.ResponseWriter, req *http.Request) {
 }
 
 func loadStudentList() {
-	studentIDList = []string{}
+	studentIDSet = map[string]interface{}{}
 
 	f, err := os.Open("login.txt")
 	if err != nil {
@@ -207,6 +221,6 @@ func loadStudentList() {
 	var id string
 
 	for _, e := fmt.Fscanln(f, &id); e == nil; _, e = fmt.Fscanln(f, &id) {
-		studentIDList = append(studentIDList, id)
+		studentIDSet[id] = nil
 	}
 }
