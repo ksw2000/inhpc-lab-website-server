@@ -95,6 +95,9 @@ func main() {
 				return
 			}
 			dir := queries.Get("dir")
+			// 預設讀取 /files/[dir] (為講義資料)
+			// 當參數含有 course 時，讀取 /files/[dir]/course (為課程資料)
+			coursesMode := queries.Has("course")
 
 			allowDir := map[string]interface{}{}
 			if dirEntry, err := os.ReadDir("./files"); err != nil {
@@ -110,7 +113,11 @@ func main() {
 				}
 			}
 
-			if dirEntry, err := os.ReadDir(path.Join("./files/", dir)); err != nil {
+			readPath := path.Join("./files/", dir)
+			if coursesMode {
+				readPath = path.Join(readPath, "course")
+			}
+			if dirEntry, err := os.ReadDir(readPath); err != nil {
 				sender.Err = "params error"
 				encoder.Encode(sender)
 				return
@@ -136,12 +143,15 @@ func main() {
 	})
 
 	mux.Handle("/files/", http.StripPrefix("/files/", neuter(http.FileServer(http.Dir("./files/")), true, session)))
+	mux.HandleFunc("/syhsieh.htm", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/advisor", http.StatusPermanentRedirect)
+	})
 	mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./angular/"))))
 
 	// TLS Manager
 	var tlsConfig *tls.Config
 	if *port == 443 {
-		if cfg.Autocert {
+		if !cfg.Autocert {
 			cer, err := tls.LoadX509KeyPair(cfg.Certification.Crt, cfg.Certification.Key)
 			if err != nil {
 				panic(err)

@@ -29,6 +29,12 @@ sudo service httpd start   # 重啟
 
 4. main.go 參數 `-p` 指定 port 預設在 `8080`，佈署時可以設定 `443` 會同時執行 http `80` 和 https `443` 並將 http `80` 重新導向 `443` https
 
+## Redirect
+
+幫舊網站做重定向
+
++ `/syhsieh.htm` => `/`
+
 ## API
 
 ### Login
@@ -69,13 +75,21 @@ Return empty string if success
 }
 ```
 
-### List courses file
+### List courses file (Lecture)
 
 + **URL**: `/api/file?dir=[course]`
 + **Method**: `Get`
 + **Auth required:** Yes
 
 > This API return the files in the `/files/[course]/*`
+
+### List courses file (Homework or Exam)
+
++ **URL**: `/api/file?course&dir=[course]`
++ **Method**: `Get`
++ **Auth required:** Yes
+
+> This API return the files in the `/files/[course]/course/`
 
 **Response**
 ```json
