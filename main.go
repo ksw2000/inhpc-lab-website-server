@@ -101,9 +101,9 @@ func main() {
 
 			allowDir := map[string]interface{}{}
 			if dirEntry, err := os.ReadDir("./files"); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				sender.Err = "Internal server error"
 				encoder.Encode(sender)
-				w.WriteHeader(http.StatusInternalServerError)
 				return
 			} else {
 				for _, f := range dirEntry {
@@ -113,10 +113,13 @@ func main() {
 				}
 			}
 
-			readPath := path.Join("./files/", dir)
+			var readPath string
 			if coursesMode {
-				readPath = path.Join(readPath, "course")
+				readPath = path.Join("./files/", dir, "course")
+			} else {
+				readPath = path.Join("./files/", dir)
 			}
+
 			if dirEntry, err := os.ReadDir(readPath); err != nil {
 				sender.Err = "params error"
 				encoder.Encode(sender)
@@ -133,7 +136,7 @@ func main() {
 							URL  string `json:"url"`
 						}{
 							f.Name(),
-							path.Join("./files/", dir, f.Name()),
+							path.Join(readPath, f.Name()),
 						})
 					}
 				}
