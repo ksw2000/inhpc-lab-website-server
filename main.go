@@ -142,7 +142,7 @@ func main() {
 		}
 	})
 
-	mux.Handle("/files/", http.StripPrefix("/files/", neuter(http.FileServer(http.Dir("./files/")), true, session)))
+	mux.Handle("/files/", http.StripPrefix("/files/", neuter(http.FileServer(http.Dir("./files/")), session)))
 	mux.HandleFunc("/syhsieh.htm", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/advisor", http.StatusPermanentRedirect)
 	})
@@ -192,19 +192,17 @@ func main() {
 	}
 }
 
-func neuter(next http.Handler, auth bool, session *sessions.Sessions) http.Handler {
+func neuter(next http.Handler, session *sessions.Sessions) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.URL.Path)
-		if auth {
-			s := session.Start(w, r)
-			if pass, err := s.GetBoolean("isLogin"); err != nil || !pass {
-				fmt.Fprintf(w, "Access deny")
-				w.WriteHeader(http.StatusForbidden)
-				return
-			}
+		s := session.Start(w, r)
+		if pass, err := s.GetBoolean("isLogin"); err != nil || !pass {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Access deny")
+			return
 		}
 		if strings.HasSuffix(r.URL.Path, "/") {
-			http.Redirect(w, r, "/error/403", http.StatusFound)
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprintf(w, "Access deny")
 			return
 		}
 		next.ServeHTTP(w, r)
