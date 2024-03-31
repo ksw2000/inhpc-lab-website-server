@@ -33,7 +33,7 @@ sudo service httpd start   # 重啟
 
 幫舊網站做重定向
 
-+ `/syhsieh.htm` => `/`
++ `/syhsieh.htm` => `/advisor`
 
 ## API
 
