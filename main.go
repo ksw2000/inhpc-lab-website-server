@@ -197,12 +197,12 @@ func neuter(next http.Handler, session *sessions.Sessions) http.Handler {
 		s := session.Start(w, r)
 		if pass, err := s.GetBoolean("isLogin"); err != nil || !pass {
 			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "Access deny")
+			fmt.Fprintf(w, "Access denied (需登入)")
 			return
 		}
 		if strings.HasSuffix(r.URL.Path, "/") {
 			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "Access deny")
+			fmt.Fprintf(w, "Access denied (不可存取目錄)")
 			return
 		}
 		next.ServeHTTP(w, r)
